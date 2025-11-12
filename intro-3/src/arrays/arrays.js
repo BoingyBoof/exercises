@@ -153,8 +153,9 @@ export function keyBy(array, key) {
 
 // Dato un array, inserire il nuovo elemento all'indice specificato, sostituendo quello che c'è già
 export function replaceItemAtIndex(array, newItem, index) {
-    array.splice(index,1,newItem)
-    return array
+    let newArray = [...array]
+    newArray.splice(index,1,newItem)
+    return newArray
 }
 
 // Dato un array di oggetti, aggiungere a ogni oggetto le proprietà specificate
@@ -343,24 +344,76 @@ export function populatePosts(posts, comments, users) {
 
 // Implementare il metodo nativo Array.map()
 export function map(array, mapper) {
-    array.forEach(element => {
-        element = mapper(element)
-    });
-    return array
+    let retArray = [];
+    array.forEach((element,index,arrayy) => {
+        retArray.push(mapper(element,index,arrayy));
+    }); // hey
+    return retArray
 }
 
 // Implementare il metodo nativo Array.filter()
-export function filter(array, predicate) {}
+export function filter(array, predicate) {
+    let retArray = [];
+    array.forEach((element,index,arrayy) => {
+        if (predicate(element,index,arrayy)){
+            retArray.push(element);
+        }
+    }); 
+    return retArray
+}
 
 // Implementare il metodo nativo Array.some()
-export function some(array, predicate) {}
+export function some(array, predicate) {
+    let truthValue = false;
+    array.forEach((element,index,arrayy) => {
+        if (predicate(element,index,arrayy)){
+            truthValue = true
+        }
+    }); 
+    return truthValue
+}
 
 // Implementare il metodo nativo Array.every()
-export function every(array, predicate) {}
+export function every(array, predicate) {
+    let truthValue = true;
+    array.forEach((element,index,arrayy) => {
+        if (!(predicate(element,index,arrayy))){
+            truthValue = false
+        }
+    }); 
+    return truthValue
+}
 
 // Implementare il metodo nativo Array.reduce()
-export function reduce(array, reducer, initialState) {}
+export function reduce(array, reducer, initialState) {
+    let reducedValue;
+    if(initialState !== undefined){
+        reducedValue = initialState;
+    }else{
+        reducedValue = array[0]
+    }
+    array.forEach((element,index,arrayy) => {
+        if(initialState === undefined && index == 0){
+            
+        }else{
+        reducedValue = reducer(reducedValue,element,index,arrayy)
+        }
+    }); 
+    return reducedValue
+}
 
 // Dato un array e una funzione, spostare alla fine dell'array l'elemento per il quale la funzione restituisce true
 // Nota: soltanto uno degli elementi soddisfa la funzione shouldMove
-export function moveToEnd(array, shouldMove) {}
+export function moveToEnd(array, shouldMove) {
+    let newArray = []
+    let savedValue;
+    array.forEach((element,index) =>{
+        if(shouldMove(element)){
+            savedValue = element
+        }else{
+            newArray.push(element)
+        }
+    })
+    newArray.push(savedValue) //
+    return newArray;
+}
