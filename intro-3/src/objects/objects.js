@@ -110,40 +110,26 @@ export function hasValidProperty(object, predicate) {
 // { id: 1, name: 'John', carId: 33 } e l'altro { 33: { id: 33, manufacturer: 'Ford' } }
 // Restituire un array con i due oggetti (vedere il test per altri esempi)
 // Idealmente dovrebbe funzionare per ogni oggetto trovato dentro l'oggetto di partenza, anche quelli annidati
+
 export function normalizeObject(object) {
     /*
     object potenzialmente composto da oggetti, object[key]
-    questi possono a loro volta essere composti da oggetti, object[key][keyRec]
+    questi possono a loro volta essere composti da oggetti
     */
     let newObjectArray = [{},{}];
-    for(let key in object){ //Itera le proprietà dell'oggetto "padre"
-        if(typeof object[key] === 'object'){ //Se questa proprietà è un oggetto
-            newObjectArray[0][key+"Id"] = object[key]["id"]; //Nel primo array crea la proprietà id
-            for(let keyRec in object[key]){//Itera le proprietà dell'oggetto (a sua volta una proprietà)
-                if(typeof object[key][keyRec] === 'object'){ //Se a loro volta sono oggetti 
-                
-                newObjectArray[1][object[key][keyRec]["id"]] = 
-                Object.assign({},normalizeObject(object[key][keyRec])[1])
-                newObjectArray[1][object[key]["id"]] = 
-                Object.assign({},normalizeObject(object[key][keyRec])[0])
-                //console.log("AAAAAAAAAAAAAA")
-                //console.log( newObjectArray[1][object[key][keyRec]["id"]])
-                //console.log("AAAAAAAAAAAAAA")
-                //console.log(newObjectArray[1][object[keyRec]["id"]])
-                
-                }
-                else{
-                    newObjectArray[1][object[key]["id"]] = (object[key][keyRec])
-                    console.log(object[key])
-                }
+    for(let key in object){ //carName, carDescription, etc.
+        if(typeof object[key] === 'object'){ //Object tipo engine, owner...
+            newObjectArray[0][key+"Id"] = object[key]["id"]; //Aggiungi l'id al primo oggetto
+            let normResult =normalizeObject(object[key])
+            newObjectArray[1][object[key]["id"]] = normResult[0]
+            for(let keyRec in normResult[1]){
+                newObjectArray[1][normResult[1][keyRec]["id"]] = normResult[1][keyRec]
             }
         }
-        else{//Se questa proprietà non è un oggetto
-            newObjectArray[0][key] = object[key];
+        else{
+             newObjectArray[0][key] = object[key]; // Altrimenti aggiungilo al primo e basta
         }
-
-    }
-    //console.log(newObjectArray)
+    }  
     return newObjectArray;
 }
 
