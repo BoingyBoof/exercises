@@ -1,5 +1,5 @@
 // run tests by going in intro-3 and running npm test 
-// Advice: NO else, avoid nested fors, use more methods
+// Advice: NO else, avoid nested fors, use more methods, avoid returning the initial array
 
 
 // Duplicare l'array
@@ -84,12 +84,14 @@ export function findBy(array, condition) {
 // Come `findBy`, ma restituisce tutti gli elementi per i quali `condition` risulta vera
 // Se per nessun elemento risulta vera, restituire un array vuoto
 export function filterBy(array, condition) {
-    var returnArray = [];
+    
     //filter
    
     //Very similar to above but nullish operator is not even necessary
     return array.filter(object => object[Object.keys(condition)[0]] == Object.values(condition)[0])
-    /*for(const element of array){
+    /*
+    var returnArray = [];
+    for(const element of array){
         for(const arrKey of Object.keys(element)){
             for(const conKey of Object.keys(condition)){
                 if(arrKey == conKey){
@@ -106,40 +108,61 @@ export function filterBy(array, condition) {
 // Dato un array e un elemento, se l'elemento non è presente nell'array va inserito alla fine
 // Se l'elemento è già presente, va rimosso
 export function toggleArrayItem(array, element) {
-    var foundIndex = array.findIndex((item => item == element))
+    const foundIndex = array.findIndex((item => item == element))
+    if(foundIndex == -1 ){
+        return addToArrayEnd(array,element)
+    }
+    let retArray = cloneArray(array)
+    retArray.splice(foundIndex,1);
+    return retArray;
+    /*var foundIndex = array.findIndex((item => item == element))
     if (foundIndex != -1){
         array.splice(foundIndex,1)
     }
     else{
         array.push(element)
     }
-    return array
+    return array*/
 }
 
 // Rimuove dall'array l'elemento all'indice specificato
 // Se l'indice è superiore o inferiore alla lunghezza dell'array, restituire l'array originale
 export function removeFromArray(array, index) {
-    if (index < 0 || index >= array.length)
+    if(index < 0 || index >= array.length){
+        return array
+    };
+    let retArray = cloneArray(array);
+    retArray.splice(index,1);
+    return retArray;
+    /*if (index < 0 || index >= array.length)
         return array
     else 
         array.splice(index,1)
-        return array
+        return array*/
 }
 
 // Dati 2 o più array, unirli in un unico array
 export function mergeArrays(...arrays) {
-    var baseArray = []
+    let mergedArray = [];
+    for(const array of arrays){
+        mergedArray = mergedArray.concat(array);
+    }
+    return mergedArray;
+    /*var baseArray = []
     for(const array of arrays){
         for(const element of array){
             baseArray.push(element)
         }
     }
-    return baseArray
+    return baseArray*/
 }
 
 // Dati 2 o più array, unirli in un unico array, ma rimuovere eventuali duplicati
 export function mergeArraysUnique(...arrays) {
-    var baseArray = []
+    return [...new Set (mergeArrays(...arrays))]
+
+
+    /*var baseArray = []
     for(const array of arrays){
         for(const element of array){
             if(baseArray.find((item => item == element))){
@@ -151,7 +174,7 @@ export function mergeArraysUnique(...arrays) {
             
         }
     }
-    return baseArray
+    return baseArray*/
 }
 
 // Dato un array di oggetti, una chiave e una direzione (ASC | DESC), ordinare l'array in base ai valori della chiave specificata
