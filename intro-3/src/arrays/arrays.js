@@ -1,36 +1,51 @@
-// run tests by going in intro-3 and running npm test
+// run tests by going in intro-3 and running npm test 
+// Advice: NO else, avoid nested fors, use more methods
+
+
 // Duplicare l'array
 export function cloneArray(array) {
-    var array2 = [...array];
-    return array2;
+    // let newArray = [...array] probs
+    return [...array];
 }
 
 // Inserire l'elemento alla fine
 export function addToArrayEnd(array, newElement) {
-    array.push(newElement);
-    return array;
+   // array.push(newElement);
+    return [...array, newElement];
 }
 
 // Inserire l'elemento all'inizio
 export function addToArrayBeginning(array, newElement) {
-    array.unshift(newElement);
-    return array;
+    //array.unshift(newElement);
+    //return array;
+    return [newElement, ...array]
 }
 
 // Inserire l'elemento all'indice specificato
 // Se l'indice è negativo, inserirlo all'inizio dell'array
 // Se l'indice è superiore alla lunghezza dell'array, inserirlo alla fine
 export function insertIntoArray(array, newElement, index) {
-    if (index < 0){
-        array.unshift(newElement);
+    /*if (index < 0){
+       //array.unshift(newElement);
+        return addToArrayBeginning(array)
     }
-    else if(index > (array.length)){
+
+   if(index > (array.length)){
         array.push(newElement);
     }
-    else{
-            array.splice(index,0,newElement)
-        }
-    return array;
+   
+    array.splice(index,0,newElement)
+        
+    return array;*/
+    if (index < 0){
+        return addToArrayBeginning(array,newElement);
+    }
+    if(index >(array.length)){
+        return addToArrayEnd(array,newElement)
+    }
+    let retArray = [...array];
+    retArray.splice(index,0,newElement);
+    return retArray;
     
 }
 
@@ -40,7 +55,19 @@ export function insertIntoArray(array, newElement, index) {
 // nel secondo caso il primo elemento che ha name uguale ad Anna
 // Restituire null se non viene trovato nulla
 export function findBy(array, condition) {
-    for(const element of array){
+    //find
+    //Object.entries/Object.keys/Object.values
+    
+    // Nullish coalescing operator for fun
+    // Otherwise: === undefined return null
+    return array.find(object => object[Object.keys(condition)[0]] == Object.values(condition)[0]) ?? null
+    
+    //for(const element of array){
+    //    console.log(Object.entries(element))
+    //    element.find((property) => )
+    //}
+    //console.log(find(Object.entries(array)))
+    /*for(const element of array){
         for(const arrKey of Object.keys(element)){
             for(const conKey of Object.keys(condition)){
                 if(arrKey == conKey){
@@ -51,14 +78,18 @@ export function findBy(array, condition) {
             }
         }
     }
-    return null;
+    return null;*/
 }
 
 // Come `findBy`, ma restituisce tutti gli elementi per i quali `condition` risulta vera
 // Se per nessun elemento risulta vera, restituire un array vuoto
 export function filterBy(array, condition) {
     var returnArray = [];
-    for(const element of array){
+    //filter
+   
+    //Very similar to above but nullish operator is not even necessary
+    return array.filter(object => object[Object.keys(condition)[0]] == Object.values(condition)[0])
+    /*for(const element of array){
         for(const arrKey of Object.keys(element)){
             for(const conKey of Object.keys(condition)){
                 if(arrKey == conKey){
@@ -69,7 +100,7 @@ export function filterBy(array, condition) {
             }
         }
     }
-    return returnArray
+    return returnArray*/
 }
 
 // Dato un array e un elemento, se l'elemento non è presente nell'array va inserito alla fine
