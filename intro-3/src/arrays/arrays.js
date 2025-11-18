@@ -403,7 +403,64 @@ export function populate(array, dataArray, key) {
 // considerando che ai prodotti con special = true si applica la percentuale specificata in discount.special,
 // agli altri prodotti la percentuale specificata in discounts.default
 export function getTotal(products, discounts) {
-    var priceTotal = 0
+    function discountPrice(price,discount){
+        return Math.round((((price)/100)*(100-discount))*10)/10 
+    }
+     return products.reduce((priceTotal, product) => {
+        const initPrice = product.price*product.quantity;
+        priceTotal += product.special ? 
+          discountPrice(initPrice,('special' in discounts) ? discounts.special : 0)
+        : discountPrice(initPrice,('default' in discounts) ? discounts.default : 0)
+        return priceTotal
+    }, 0) 
+
+   /*  let priceTotal = 0
+    products.forEach(element => {
+        const initPrice = element.price*element.quantity;
+        priceTotal += element.special ? 
+          discountPrice(initPrice,('special' in discounts) ? discounts.special : 0)
+        : discountPrice(initPrice,('default' in discounts) ? discounts.default : 0)
+        /* if(element.special){
+                if('special' in discounts){
+                    priceTotal += discountPrice(initPrice,discounts.special)
+                }
+                else{
+                    priceTotal += initPrice
+                }
+        }
+        else{
+            if('default' in discounts){
+                    priceTotal += discountPrice(initPrice,discounts.default)
+                }
+                else{
+                    priceTotal += initPrice
+                }
+        } 
+    }); 
+    
+    return priceTotal */
+    
+    /* let priceTotal = 0
+    products.forEach(element => {
+        if(element.special){
+                if('special' in discounts){
+                    priceTotal += Math.round((((element.price * element.quantity)/100)*(100-discounts.special))*10)/10 
+                }
+                else{
+                    priceTotal += element.price*element.quantity
+                }
+        }
+        else{
+            if('default' in discounts){
+                    priceTotal += Math.round((((element.price * element.quantity)/100)*(100-discounts.default))*10)/10 
+                }
+                else{
+                    priceTotal += element.price*element.quantity
+                }
+        }
+    }); */
+    //return priceTotal
+    /* var priceTotal = 0
     products.forEach(element => {
         if('special' in element){
             if(element.special == true){
@@ -432,7 +489,7 @@ export function getTotal(products, discounts) {
                 }
         }
     });
-    return priceTotal
+    return priceTotal */
 }
 
 // Dati un array di post, di commenti e di utenti (vedere in mock.js), creare un nuovo array dove ogni post include:
@@ -442,10 +499,9 @@ export function getTotal(products, discounts) {
 // Se non ci sono commenti, comments deve essere un array vuoto
 // Controllare il risultato del test per vedere come deve essere l'array finale
 export function populatePosts(posts, comments, users) {
-    var newArray = []
+    let newArray = []
     
     posts.forEach(post => {
-        var tempCommentArray = []
         newArray.push({
             user: users.find((user) => user.id == post.userId),
             id: post.id,
@@ -453,7 +509,7 @@ export function populatePosts(posts, comments, users) {
             body:post.body,
             comments: []
         })
-        tempCommentArray = comments.filter((comment)=>comment.postId == post.id)
+        const tempCommentArray = comments.filter((comment)=>comment.postId == post.id)
         tempCommentArray.forEach(comment => {
             newArray[newArray.length-1].comments.push({
                 id: comment.id,
@@ -530,9 +586,11 @@ export function reduce(array, reducer, initialState) {
 // Dato un array e una funzione, spostare alla fine dell'array l'elemento per il quale la funzione restituisce true
 // Nota: soltanto uno degli elementi soddisfa la funzione shouldMove
 export function moveToEnd(array, shouldMove) {
-    let newArray = []
-    let savedValue;
-    array.forEach((element,index) =>{
+    let newArray = cloneArray(array);
+    //let savedValue;
+    newArray.push(newArray.splice(newArray.findIndex(shouldMove),1)[0])
+    return newArray
+    /* array.forEach((element) =>{
         if(shouldMove(element)){
             savedValue = element
         }else{
@@ -540,5 +598,5 @@ export function moveToEnd(array, shouldMove) {
         }
     })
     newArray.push(savedValue) //
-    return newArray;
+    return newArray; */
 }
