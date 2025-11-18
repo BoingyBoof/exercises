@@ -214,7 +214,7 @@ export function map(array, mapper) {
     let retArray = [];
     array.forEach((element,index,arrayy) => {
         retArray.push(mapper(element,index,arrayy));
-    }); // hey
+    });
     return retArray
 }
 
