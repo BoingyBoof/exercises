@@ -30,6 +30,7 @@ export const users = Object.freeze([user10])
 // addressChanges è un oggetto che contiene una o più proprietà di Address da cambiare, ad esempio { city: London }
 // Restituire l'array di utenti con le proprietà cambiate, mantenendo invariate quelle non presenti in addressChanges
 export const changeUsersAddress = (users, addressChanges) => {
+  //Map is goated here??
   let newUsers = [];
   let newUser = {};
   users.forEach(user => {

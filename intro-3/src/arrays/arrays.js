@@ -52,6 +52,7 @@ export function filterBy(array, condition) {
 // Dato un array e un elemento, se l'elemento non è presente nell'array va inserito alla fine
 // Se l'elemento è già presente, va rimosso
 export function toggleArrayItem(array, element) {
+    
     const foundIndex = array.findIndex((item => item == element))
     if(foundIndex == -1 ){
         return addToArrayEnd(array,element)
@@ -64,21 +65,12 @@ export function toggleArrayItem(array, element) {
 // Rimuove dall'array l'elemento all'indice specificato
 // Se l'indice è superiore o inferiore alla lunghezza dell'array, restituire l'array originale
 export function removeFromArray(array, index) {
-    if(index < 0 || index >= array.length){
-        return array
-    };
-    let retArray = cloneArray(array);
-    retArray.splice(index,1);
-    return retArray;
+    return (index < 0 || index >= array.length) ? array : array.filter((_,arrIndex) => index !== arrIndex)
 }
 
 // Dati 2 o più array, unirli in un unico array
 export function mergeArrays(...arrays) {
-    let mergedArray = [];
-    for(const array of arrays){
-        mergedArray = mergedArray.concat(array);
-    }
-    return mergedArray;
+    return [].concat(...arrays);
 }
 
 // Dati 2 o più array, unirli in un unico array, ma rimuovere eventuali duplicati
