@@ -5,16 +5,20 @@
 
 // Duplicare l'array
 export function cloneArray(array) {
+    // let newArray = [...array] probs
     return [...array];
 }
 
 // Inserire l'elemento alla fine
 export function addToArrayEnd(array, newElement) {
+   // array.push(newElement);
     return [...array, newElement];
 }
 
 // Inserire l'elemento all'inizio
 export function addToArrayBeginning(array, newElement) {
+    //array.unshift(newElement);
+    //return array;
     return [newElement, ...array]
 }
 
@@ -22,6 +26,18 @@ export function addToArrayBeginning(array, newElement) {
 // Se l'indice è negativo, inserirlo all'inizio dell'array
 // Se l'indice è superiore alla lunghezza dell'array, inserirlo alla fine
 export function insertIntoArray(array, newElement, index) {
+    /*if (index < 0){
+       //array.unshift(newElement);
+        return addToArrayBeginning(array)
+    }
+
+   if(index > (array.length)){
+        array.push(newElement);
+    }
+   
+    array.splice(index,0,newElement)
+        
+    return array;*/
     if (index < 0){
         return addToArrayBeginning(array,newElement);
     }
@@ -40,13 +56,54 @@ export function insertIntoArray(array, newElement, index) {
 // nel secondo caso il primo elemento che ha name uguale ad Anna
 // Restituire null se non viene trovato nulla
 export function findBy(array, condition) {
+    //find
+    //Object.entries/Object.keys/Object.values
+    
+    // Nullish coalescing operator for fun
+    // Otherwise: === undefined return null
     return array.find(object => object[Object.keys(condition)[0]] == Object.values(condition)[0]) ?? null
+    
+    //for(const element of array){
+    //    console.log(Object.entries(element))
+    //    element.find((property) => )
+    //}
+    //console.log(find(Object.entries(array)))
+    /*for(const element of array){
+        for(const arrKey of Object.keys(element)){
+            for(const conKey of Object.keys(condition)){
+                if(arrKey == conKey){
+                    if(element[arrKey] == condition[conKey]){
+                        return element
+                    }
+                }
+            }
+        }
+    }
+    return null;*/
 }
 
 // Come `findBy`, ma restituisce tutti gli elementi per i quali `condition` risulta vera
 // Se per nessun elemento risulta vera, restituire un array vuoto
 export function filterBy(array, condition) {
+    
+    //filter
+   
+    //Very similar to above but nullish operator is not even necessary
     return array.filter(object => object[Object.keys(condition)[0]] == Object.values(condition)[0])
+    /*
+    var returnArray = [];
+    for(const element of array){
+        for(const arrKey of Object.keys(element)){
+            for(const conKey of Object.keys(condition)){
+                if(arrKey == conKey){
+                    if(element[arrKey] == condition[conKey]){
+                        returnArray.push(element)
+                    }
+                }
+            }
+        }
+    }
+    return returnArray*/
 }
 
 // Dato un array e un elemento, se l'elemento non è presente nell'array va inserito alla fine
@@ -59,6 +116,14 @@ export function toggleArrayItem(array, element) {
     let retArray = cloneArray(array)
     retArray.splice(foundIndex,1);
     return retArray;
+    /*var foundIndex = array.findIndex((item => item == element))
+    if (foundIndex != -1){
+        array.splice(foundIndex,1)
+    }
+    else{
+        array.push(element)
+    }
+    return array*/
 }
 
 // Rimuove dall'array l'elemento all'indice specificato
@@ -70,6 +135,11 @@ export function removeFromArray(array, index) {
     let retArray = cloneArray(array);
     retArray.splice(index,1);
     return retArray;
+    /*if (index < 0 || index >= array.length)
+        return array
+    else 
+        array.splice(index,1)
+        return array*/
 }
 
 // Dati 2 o più array, unirli in un unico array
@@ -79,11 +149,34 @@ export function mergeArrays(...arrays) {
         mergedArray = mergedArray.concat(array);
     }
     return mergedArray;
+    /*var baseArray = []
+    for(const array of arrays){
+        for(const element of array){
+            baseArray.push(element)
+        }
+    }
+    return baseArray*/
 }
 
 // Dati 2 o più array, unirli in un unico array, ma rimuovere eventuali duplicati
 export function mergeArraysUnique(...arrays) {
+    //merges all arrays, turns it into a set, and uses spread syntax to turn it back into an array
     return [...new Set (mergeArrays(...arrays))]
+
+
+    /*var baseArray = []
+    for(const array of arrays){
+        for(const element of array){
+            if(baseArray.find((item => item == element))){
+
+            }
+            else{
+                baseArray.push(element)
+            }
+            
+        }
+    }
+    return baseArray*/
 }
 
 // Dato un array di oggetti, una chiave e una direzione (ASC | DESC), ordinare l'array in base ai valori della chiave specificata
@@ -97,6 +190,13 @@ export function sortBy(array, key, direction) {
     return (direction == 'ASC') 
     ? retArray.sort(function(a,b){return a[key]-b[key]}) 
     : retArray.sort(function(a,b){return b[key]-a[key]})
+    /*if(direction == 'ASC') {
+     array.sort(function(a,b){return a[key]-b[key]})
+     }
+     else if(direction =='DESC'){
+        array.sort(function(a,b){return b[key]-a[key]})
+     }
+     return array*/
 }
 
 // Dato un array di oggetti, convertirlo in oggetto e usare come chiave il valore di `key`
@@ -104,6 +204,7 @@ export function sortBy(array, key, direction) {
 // { A: { id: 1, name: 'A' }, B: { id: 2, name: 'B' } }
 export function keyBy(array, key) {
     const obj = {}
+    
     for(const element of array){
         obj[element[key]] = element
     }
@@ -113,6 +214,7 @@ export function keyBy(array, key) {
 // Dato un array, inserire il nuovo elemento all'indice specificato, sostituendo quello che c'è già
 export function replaceItemAtIndex(array, newItem, index) {
     let newArray = cloneArray(array);
+    //newArray.splice(index,1,newItem);
     newArray[index] = newItem;
     return newArray;
 }
@@ -121,8 +223,34 @@ export function replaceItemAtIndex(array, newItem, index) {
 // Es.: [{ id: 1, name: 'A' }, { id: 2, name: 'B' }] con properties { city: 'X', number: 99 }
 // deve restituire [{ id: 1, name: 'A', city: 'X', number: 99  }, { id: 2, name: 'B', city: 'X', number: 99 }]
 // L'array originale e i suoi elementi non devono essere modificati
-export function addExtraProperties(array, properties) {   
+export function addExtraProperties(array, properties) {
+    
     return array.map(element => Object.assign({}, element, properties))
+    
+    /* let newArray = []
+    
+    for(const element of array){
+        let newElement = Object.assign({}, element, properties)
+        //let newElement = {...element, ...properties} // Alternate with spread syntax
+        newArray.push(newElement)
+    }
+
+    return newArray */
+    /*let newArray = []
+    
+    for(const element of array){
+        let newElement = {}
+        for(const propertyKey of Object.keys(element)){
+            newElement[propertyKey] = element[propertyKey]
+        }
+        for(const propertyKey of Object.keys(properties)){
+            newElement[propertyKey] = properties[propertyKey]
+        }
+        //console.log(newElement)
+        newArray.push(newElement)
+    }
+
+    return newArray*/
 }
 
 // Dato un array di oggetti rimuovere da ciascuno di essi le proprietà specificate
@@ -130,11 +258,32 @@ export function addExtraProperties(array, properties) {
 // deve restituire [{ id: 1, name: 'A' }]
 // L'array originale e i suoi elementi non devono essere modificati
 export function removeProperties(array, properties) {
+    //Quirky way...
     const newObj = {}
     for(const key of properties){
         newObj[key] = undefined
     }
     return addExtraProperties(array,newObj)
+    //for(const element of array){
+     //   let newElement = Object.assign({},element,newObj)
+     //   newArray.push(newElement)
+    //}
+    
+    
+    /*var newArray = []
+    
+    for(const element of array){
+        var newElement = {}
+        for(const propertyKey of Object.keys(element)){
+            newElement[propertyKey] = element[propertyKey]
+        }
+        for(const propertyKey of properties){
+            delete newElement[propertyKey]
+        }
+
+        newArray.push(newElement)
+    }
+    return newArray*/
 }
 
 // Dato un array di oggetti con una chiave id e un array di id selezionati,
@@ -143,6 +292,7 @@ export function removeProperties(array, properties) {
 // deve restituire [{ id: 1, name: 'A' }, { id: 2, name: 'B', selected: true }, { id: 3, name: 'C', selected: true }]
 // L'array originale e i suoi elementi non devono essere modificati
 export function setSelected(array, selectedIds) {
+
     return array.map(element => {
         let newElement = Object.assign({}, element)
         if(selectedIds.includes(newElement["id"])){
@@ -150,6 +300,32 @@ export function setSelected(array, selectedIds) {
         }
         return newElement;
     })
+
+    /*const newArray = []
+    
+    for(let element of array){
+        let newElement = Object.assign({}, element)
+        if(selectedIds.includes(newElement["id"])){
+            newElement["selected"] = true
+        }
+        newArray.push(newElement)
+    }
+    return newArray*/
+
+    /*var newArray = []
+    
+    for(const element of array){
+        var newElement = {}
+        for(const propertyKey of Object.keys(element)){
+            newElement[propertyKey] = element[propertyKey]
+        }
+        for(const selectedId of selectedIds){
+            if(newElement.id == selectedId) newElement.selected = true
+        }
+
+        newArray.push(newElement)
+    }
+    return newArray*/
 }
 
 // Dato un array di oggetti, rimapparlo estraendo la chiave specificata
@@ -157,7 +333,27 @@ export function setSelected(array, selectedIds) {
 // deve restituire ['A', 'B', 'C']
 // Se la chiave non esiste, restituire l'array originale
 export function mapTo(array, key) {
+    //Specific advice: map, check every entry for the key
     return (array.every((object) => object.hasOwnProperty(key))) ? array.map((element) => element[key]) : array
+    /*let retArray = [];
+
+    if(array[0].hasOwnProperty(key)){
+        for(const element of array){
+            retArray.push(element[key])
+        }
+        return retArray
+    }
+    return array*/
+    /*var newArray = []
+    if(array[0].hasOwnProperty(key)){
+        for(const element of array){
+            newArray.push(element[key])
+        }
+    return newArray
+    }
+    else {
+        return array
+    }*/
 }
 
 // Dato un array di oggetti e una funzione `predicate`, eseguire la funzione per ogni elemento
@@ -166,6 +362,13 @@ export function mapTo(array, key) {
 // `areItemsValid` restituisce false perché non tutti gli elementi hanno `age` maggiore di 30
 export function areItemsValid(array, predicate) {
     return array.every(predicate)
+    /*var flag = true;
+    array.forEach((ele) => {
+        if (predicate(ele) == false){
+            flag = false
+        }
+    })
+    return flag*/
 }
 
 // Dato un array di stringhe, un array di oggetti e una chiave, restituire un nuovo array
@@ -174,8 +377,24 @@ export function areItemsValid(array, predicate) {
 // `populate` reve restituire [{ id: '11', name: 'B' }, { id: '22', name: 'C' }, { id: '33', name: 'A' }]
 // perché '11' nel primo array corrisponde con l'oggetto che ha id = '11' nel secondo array e così via
 export function populate(array, dataArray, key) {
-
+    //map
     return array.map((value) => dataArray.find((element) => value == element[key]))
+    
+    /*let newArray = [];
+    array.forEach((value) =>{
+        newArray.push(dataArray.find((element) => value == element[key]))
+    })
+    return newArray;*/
+
+    /*var newArray = []//
+    array.forEach((value)=>{
+        dataArray.forEach((element)=>{
+            if (value == element[key]) {
+                newArray.push(element)
+            }
+        })     
+    })
+    return newArray*/
 }
 
 // Dato un array products del tipo { product: 'A', price: 100, quantity: 1, special: true }
@@ -194,6 +413,83 @@ export function getTotal(products, discounts) {
         : discountPrice(initPrice,('default' in discounts) ? discounts.default : 0)
         return priceTotal
     }, 0) 
+
+   /*  let priceTotal = 0
+    products.forEach(element => {
+        const initPrice = element.price*element.quantity;
+        priceTotal += element.special ? 
+          discountPrice(initPrice,('special' in discounts) ? discounts.special : 0)
+        : discountPrice(initPrice,('default' in discounts) ? discounts.default : 0)
+        /* if(element.special){
+                if('special' in discounts){
+                    priceTotal += discountPrice(initPrice,discounts.special)
+                }
+                else{
+                    priceTotal += initPrice
+                }
+        }
+        else{
+            if('default' in discounts){
+                    priceTotal += discountPrice(initPrice,discounts.default)
+                }
+                else{
+                    priceTotal += initPrice
+                }
+        } 
+    }); 
+    
+    return priceTotal */
+    
+    /* let priceTotal = 0
+    products.forEach(element => {
+        if(element.special){
+                if('special' in discounts){
+                    priceTotal += Math.round((((element.price * element.quantity)/100)*(100-discounts.special))*10)/10 
+                }
+                else{
+                    priceTotal += element.price*element.quantity
+                }
+        }
+        else{
+            if('default' in discounts){
+                    priceTotal += Math.round((((element.price * element.quantity)/100)*(100-discounts.default))*10)/10 
+                }
+                else{
+                    priceTotal += element.price*element.quantity
+                }
+        }
+    }); */
+    //return priceTotal
+    /* var priceTotal = 0
+    products.forEach(element => {
+        if('special' in element){
+            if(element.special == true){
+                if('special' in discounts){
+                    priceTotal += Math.round((((element.price * element.quantity)/100)*(100-discounts.special))*10)/10 
+                }
+                else{
+                    priceTotal += element.price*element.quantity
+                }
+            }
+            else{
+                if('default' in discounts){
+                    priceTotal += Math.round((((element.price * element.quantity)/100)*(100-discounts.default))*10)/10 
+                }
+                else{
+                    priceTotal += element.price*element.quantity
+                }
+            }
+        }
+        else{
+            if('default' in discounts){
+                    priceTotal += Math.round((((element.price * element.quantity)/100)*(100-discounts.default))*10)/10 
+                }
+                else{
+                    priceTotal += element.price*element.quantity
+                }
+        }
+    });
+    return priceTotal */
 }
 
 // Dati un array di post, di commenti e di utenti (vedere in mock.js), creare un nuovo array dove ogni post include:
@@ -203,6 +499,7 @@ export function getTotal(products, discounts) {
 // Se non ci sono commenti, comments deve essere un array vuoto
 // Controllare il risultato del test per vedere come deve essere l'array finale
 export function populatePosts(posts, comments, users) {
+    
     return posts.map(post => ({
         user: users.find(user => user.id == post.userId),
         id:    post.id,
@@ -215,6 +512,29 @@ export function populatePosts(posts, comments, users) {
             body: comment.body,
             }))
     }))
+
+    /* const postArray = []
+    
+    posts.forEach((post,index) => {
+        postArray.push({
+            user: users.find((user) => user.id == post.userId),
+            id:    post.id,
+            title: post.title,
+            body:  post.body,
+            comments: []
+        })
+        const commentArray = comments.filter((comment)=>comment.postId == post.id)
+        commentArray.forEach(comment => {
+            postArray[index].comments.push({
+                id: comment.id,
+                name: comment.name,
+                user:users.find((user) => user.id == comment.userId),
+                body: comment.body,
+            })
+        });
+
+    });
+    return postArray */
 }
 
 // Implementare il metodo nativo Array.map()
@@ -262,7 +582,7 @@ export function every(array, predicate) {
 // Implementare il metodo nativo Array.reduce()
 export function reduce(array, reducer, initialState) {
     let reducedValue = (initialState ?? array[0])
-
+    
     array.forEach((element,index,arrayy) => {
         if(!(initialState === undefined && index == 0)){
             reducedValue = reducer(reducedValue,element,index,arrayy)
@@ -270,12 +590,36 @@ export function reduce(array, reducer, initialState) {
     }); 
 
     return reducedValue;
+    /* let reducedValue;
+    if(initialState !== undefined){
+        reducedValue = initialState;
+    }else{
+        reducedValue = array[0]
+    }
+    array.forEach((element,index,arrayy) => {
+        if(initialState === undefined && index == 0){
+            
+        }else{
+        reducedValue = reducer(reducedValue,element,index,arrayy)
+        }
+    }); 
+    return reducedValue */
 }
 
 // Dato un array e una funzione, spostare alla fine dell'array l'elemento per il quale la funzione restituisce true
 // Nota: soltanto uno degli elementi soddisfa la funzione shouldMove
 export function moveToEnd(array, shouldMove) {
     let newArray = cloneArray(array);
+    //let savedValue;
     newArray.push(newArray.splice(newArray.findIndex(shouldMove),1)[0])
     return newArray;
+    /* array.forEach((element) =>{
+        if(shouldMove(element)){
+            savedValue = element
+        }else{
+            newArray.push(element)
+        }
+    })
+    newArray.push(savedValue) //
+    return newArray; */
 }
