@@ -1,6 +1,7 @@
 // run tests by going in intro-3 and running npm test 
 // Advice: NO else, avoid nested fors, use more methods, avoid returning the initial array
-
+// Advice 2: array functions like map/reduce; const for objects and arrays that do not get reassigned
+// Advice 2 2: spread operators for immutability?
 
 // Duplicare l'array
 export function cloneArray(array) {
@@ -159,6 +160,7 @@ export function mergeArrays(...arrays) {
 
 // Dati 2 o più array, unirli in un unico array, ma rimuovere eventuali duplicati
 export function mergeArraysUnique(...arrays) {
+    //merges all arrays, turns it into a set, and uses spread syntax to turn it back into an array
     return [...new Set (mergeArrays(...arrays))]
 
 
@@ -184,22 +186,26 @@ export function mergeArraysUnique(...arrays) {
 // Nota: `key` farà sempre riferimento a valori numerici
 
 export function sortBy(array, key, direction) {
-    if(direction == 'ASC') {
+    let retArray = cloneArray(array)
+    return (direction == 'ASC') 
+    ? retArray.sort(function(a,b){return a[key]-b[key]}) 
+    : retArray.sort(function(a,b){return b[key]-a[key]})
+    /*if(direction == 'ASC') {
      array.sort(function(a,b){return a[key]-b[key]})
      }
      else if(direction =='DESC'){
         array.sort(function(a,b){return b[key]-a[key]})
      }
-     return array
+     return array*/
 }
 
 // Dato un array di oggetti, convertirlo in oggetto e usare come chiave il valore di `key`
 // Es.: [{ id: 1, name: 'A' }, { id: 2, name: 'B' }] con key = 'name' deve restituire
 // { A: { id: 1, name: 'A' }, B: { id: 2, name: 'B' } }
 export function keyBy(array, key) {
-    let obj = {}
+    const obj = {}
+    
     for(const element of array){
-        console.log(element[key])
         obj[element[key]] = element
     }
     return obj
@@ -207,9 +213,10 @@ export function keyBy(array, key) {
 
 // Dato un array, inserire il nuovo elemento all'indice specificato, sostituendo quello che c'è già
 export function replaceItemAtIndex(array, newItem, index) {
-    let newArray = [...array]
-    newArray.splice(index,1,newItem)
-    return newArray
+    let newArray = cloneArray(array);
+    //newArray.splice(index,1,newItem);
+    newArray[index] = newItem;
+    return newArray;
 }
 
 // Dato un array di oggetti, aggiungere a ogni oggetto le proprietà specificate
@@ -217,21 +224,33 @@ export function replaceItemAtIndex(array, newItem, index) {
 // deve restituire [{ id: 1, name: 'A', city: 'X', number: 99  }, { id: 2, name: 'B', city: 'X', number: 99 }]
 // L'array originale e i suoi elementi non devono essere modificati
 export function addExtraProperties(array, properties) {
-    var newArray = []
+    
+    return array.map(element => Object.assign({}, element, properties))
+    
+    /* let newArray = []
     
     for(const element of array){
-        var newElement = {}
+        let newElement = Object.assign({}, element, properties)
+        //let newElement = {...element, ...properties} // Alternate with spread syntax
+        newArray.push(newElement)
+    }
+
+    return newArray */
+    /*let newArray = []
+    
+    for(const element of array){
+        let newElement = {}
         for(const propertyKey of Object.keys(element)){
             newElement[propertyKey] = element[propertyKey]
         }
         for(const propertyKey of Object.keys(properties)){
             newElement[propertyKey] = properties[propertyKey]
         }
-        console.log(newElement)
+        //console.log(newElement)
         newArray.push(newElement)
     }
 
-    return newArray
+    return newArray*/
 }
 
 // Dato un array di oggetti rimuovere da ciascuno di essi le proprietà specificate
@@ -239,7 +258,19 @@ export function addExtraProperties(array, properties) {
 // deve restituire [{ id: 1, name: 'A' }]
 // L'array originale e i suoi elementi non devono essere modificati
 export function removeProperties(array, properties) {
-    var newArray = []
+    //Quirky way...
+    const newObj = {}
+    for(const key of properties){
+        newObj[key] = undefined
+    }
+    return addExtraProperties(array,newObj)
+    //for(const element of array){
+     //   let newElement = Object.assign({},element,newObj)
+     //   newArray.push(newElement)
+    //}
+    
+    
+    /*var newArray = []
     
     for(const element of array){
         var newElement = {}
@@ -252,7 +283,7 @@ export function removeProperties(array, properties) {
 
         newArray.push(newElement)
     }
-    return newArray
+    return newArray*/
 }
 
 // Dato un array di oggetti con una chiave id e un array di id selezionati,
@@ -261,7 +292,27 @@ export function removeProperties(array, properties) {
 // deve restituire [{ id: 1, name: 'A' }, { id: 2, name: 'B', selected: true }, { id: 3, name: 'C', selected: true }]
 // L'array originale e i suoi elementi non devono essere modificati
 export function setSelected(array, selectedIds) {
-    var newArray = []
+
+    return array.map(element => {
+        let newElement = Object.assign({}, element)
+        if(selectedIds.includes(newElement["id"])){
+            newElement["selected"] = true
+        }
+        return newElement;
+    })
+
+    /*const newArray = []
+    
+    for(let element of array){
+        let newElement = Object.assign({}, element)
+        if(selectedIds.includes(newElement["id"])){
+            newElement["selected"] = true
+        }
+        newArray.push(newElement)
+    }
+    return newArray*/
+
+    /*var newArray = []
     
     for(const element of array){
         var newElement = {}
@@ -274,7 +325,7 @@ export function setSelected(array, selectedIds) {
 
         newArray.push(newElement)
     }
-    return newArray
+    return newArray*/
 }
 
 // Dato un array di oggetti, rimapparlo estraendo la chiave specificata
@@ -282,15 +333,27 @@ export function setSelected(array, selectedIds) {
 // deve restituire ['A', 'B', 'C']
 // Se la chiave non esiste, restituire l'array originale
 export function mapTo(array, key) {
-    var newArray = []
-    if(array[0].hasOwnProperty(key)){
-    for(const element of array){
-        newArray.push(element[key])
-    }
+    //Specific advice: map, check every entry for the key
+    return (array.every((object) => object.hasOwnProperty(key))) ? array.map((element) => element[key]) : array
+    /*let retArray = [];
 
+    if(array[0].hasOwnProperty(key)){
+        for(const element of array){
+            retArray.push(element[key])
+        }
+        return retArray
+    }
+    return array*/
+    /*var newArray = []
+    if(array[0].hasOwnProperty(key)){
+        for(const element of array){
+            newArray.push(element[key])
+        }
     return newArray
     }
-    else return array
+    else {
+        return array
+    }*/
 }
 
 // Dato un array di oggetti e una funzione `predicate`, eseguire la funzione per ogni elemento
@@ -298,13 +361,14 @@ export function mapTo(array, key) {
 // Es.: [{ id: 1, age: 32 }, { id: 2, age: 29 }] con predicate = (item) => item.age > 30,
 // `areItemsValid` restituisce false perché non tutti gli elementi hanno `age` maggiore di 30
 export function areItemsValid(array, predicate) {
-    var flag = true;
+    return array.every(predicate)
+    /*var flag = true;
     array.forEach((ele) => {
         if (predicate(ele) == false){
             flag = false
         }
     })
-    return flag
+    return flag*/
 }
 
 // Dato un array di stringhe, un array di oggetti e una chiave, restituire un nuovo array
@@ -313,7 +377,16 @@ export function areItemsValid(array, predicate) {
 // `populate` reve restituire [{ id: '11', name: 'B' }, { id: '22', name: 'C' }, { id: '33', name: 'A' }]
 // perché '11' nel primo array corrisponde con l'oggetto che ha id = '11' nel secondo array e così via
 export function populate(array, dataArray, key) {
-    var newArray = []//
+    //map
+    return array.map((value) => dataArray.find((element) => value == element[key]))
+    
+    /*let newArray = [];
+    array.forEach((value) =>{
+        newArray.push(dataArray.find((element) => value == element[key]))
+    })
+    return newArray;*/
+
+    /*var newArray = []//
     array.forEach((value)=>{
         dataArray.forEach((element)=>{
             if (value == element[key]) {
@@ -321,7 +394,7 @@ export function populate(array, dataArray, key) {
             }
         })     
     })
-    return newArray
+    return newArray*/
 }
 
 // Dato un array products del tipo { product: 'A', price: 100, quantity: 1, special: true }
@@ -381,7 +454,6 @@ export function populatePosts(posts, comments, users) {
             comments: []
         })
         tempCommentArray = comments.filter((comment)=>comment.postId == post.id)
-        //console.log(tempCommentArray)
         tempCommentArray.forEach(comment => {
             newArray[newArray.length-1].comments.push({
                 id: comment.id,
@@ -392,7 +464,6 @@ export function populatePosts(posts, comments, users) {
         });
 
     });
-    //console.log(newArray)
     return newArray
 }
 
