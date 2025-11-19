@@ -2,40 +2,25 @@ import booleanIntersects from '@turf/boolean-intersects'
 
 // Clonare l'oggetto
 export function cloneObject(object) {
-    let newObject = Object.assign({}, object)
-    return newObject;
+    return Object.assign({}, object)
 }
 
 // Unire i due oggetti in un unico, senza modificare gli oggetti originali
 export function mergeObjects(object1, object2) {
-    let newObject = {};
-    Object.assign(newObject,object1);
-    Object.assign(newObject,object2);
-    return newObject;
+    return Object.assign({},object1, object2)
 }
 
 // Dato un oggetto e un array con chiave-valore, aggiungere chiave-valore all'oggetto
 // senza modificare l'originale, ma restituendo una copia
 export function setProperty(object, [key, value]) {
-    let newObject = {};
-    Object.assign(newObject,object);
-    newObject[key] = value;
-    return newObject;
+    return Object.assign({}, object, {[key]: value});
 }
 
 // Convertire un oggetto contentene altri oggetti in array
 // La chiave di ciascun oggetto va inserita nell'oggetto stesso come `key`
 // Es.: { a: { name: 'X' }, b: { name: 'Y' } } diventa [{ key: 'a', name: 'X' }, b: { key: 'b', name: 'Y' }]
 export function toArray(object) {
-    let newArray = [];
-    let objectHolder = {};
-    for(let key in object){
-        objectHolder = {};
-        Object.assign(objectHolder,object[key]);
-        objectHolder.key = key;
-        newArray.push(objectHolder);
-    }
-    return newArray;
+    return Object.entries(object).map(pair => Object.assign({}, {["key"]: pair[0]}, pair[1]))  
 }
 
 // Dato un oggetto, restituire un nuovo oggetto mantenendo
@@ -43,59 +28,46 @@ export function toArray(object) {
 // Es.: { name: 'Kate', number1: 100, number2: 40, number3: 77 } con predicate = (key, value) => key === 'name' || value > 50
 // restituisce  { name: 'Kate', number1: 100, number3: 77 }
 export function filterObject(object, predicate) {
-    let newObject = {};
-    Object.assign(newObject,object);
-    for(let key in newObject){
-        if(!(predicate(key,newObject[key]))){
-            delete newObject[key];
-        }
-    }
-    return newObject;
+    return Object.fromEntries(Object.entries(object).filter(pair => predicate(pair[0],pair[1])))
 }
 
 // Data una chiave `key`, una funzione `getValue` per ottenere il valore associato a quella chiave e un oggetto `cache`,
 // `getCachedValue` deve chiamare una sola volta `getValue` e conservare il valore ottenuto, in modo che se
 // la funzione viene richiamata successivamente con la stessa chiave, venga restituito il valore senza richiamare `getValue`
 export function getCachedValue(key, getValue, cache) {
-    if(key in cache){
-        return cache[key];
-    }
-    else{
-        cache[key] = getValue()
-        return cache[key];
-    }
+    return (key in cache) ? cache[key] : cache[key] = getValue()
 }
 
 // Dato un array bidimensionale, dove ogni array interno è una coppia chiave-valore, convertirlo in un oggetto
 // Es.: [['name', 'John'], ['age', 22]] diventa { name: 'John', age: 22 }
 export function arrayToObject(array) {
-    let newObject = {};
-    array.forEach(element => {
-        newObject[element[0]] = element[1];
-    });
-    return newObject;
+    return Object.fromEntries(array)
 }
 
 // Come `arrayToObject`, ma tutti i valori di tipo array devono a loro volta essere trasformati in oggetti
 // Controllare il test per vedere dato iniziale e risultato finale
 export function arrayToObjectDeep(array) {
-    let newObject = {};
-    array.forEach(element => {
-        if(Array.isArray(element[1])){
-            newObject[element[0]] = arrayToObjectDeep(element[1])
-        }else{
-            newObject[element[0]] = element[1];
-        }
-       
-    });
-    return newObject;
-}
+    //uhhh
+    return array.reduce((accumulator,currentValue) => 
+         Array.isArray(currentValue[1])
+        ? {...accumulator, [currentValue[0]] : arrayToObjectDeep(currentValue[1])} 
+        : {...accumulator, [currentValue[0]] : currentValue[1]}, {})
+
+        /* const newObject = {}
+    array.map(element =>
+        Array.isArray(element[1]) 
+        ? newObject[element[0]] = arrayToObjectDeep(element[1]) 
+        : newObject[element[0]] = element[1]
+    )
+    return newObject */
+}   
 
 // Dato un oggetto e una funzione `predicate` da chiamare con la coppia chiave-valore,
 // restituire true se almeno una delle proprietà dell'oggetto soddisfa la funzione `predicate`.
 // Es.: { name: 'Mary', age: 99, children: 4 } con predicate = (key, value) => value > 10
 // restituisce true perché è presente una proprietà maggiore di 10 (age)
 export function hasValidProperty(object, predicate) {
+
     for(let key in object){
         if(predicate(key,object[key])){
             return true;

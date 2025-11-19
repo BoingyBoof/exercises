@@ -97,7 +97,7 @@ export function sortBy(array, key, direction) {
 export function keyBy(array, key) {
     const obj = {}
     for(const element of array){
-        obj[element[key]] = element
+        obj[element[key]] = Object.assign({},element)
     }
     return obj
 }
