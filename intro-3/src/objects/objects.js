@@ -2,18 +2,19 @@ import booleanIntersects from '@turf/boolean-intersects'
 
 // Clonare l'oggetto
 export function cloneObject(object) {
-    return Object.assign({}, object)
+    return {...object}
 }
 
 // Unire i due oggetti in un unico, senza modificare gli oggetti originali
 export function mergeObjects(object1, object2) {
-    return Object.assign({},object1, object2)
+    return {...object1, ...object2}
 }
 
 // Dato un oggetto e un array con chiave-valore, aggiungere chiave-valore all'oggetto
 // senza modificare l'originale, ma restituendo una copia
 export function setProperty(object, [key, value]) {
-    return Object.assign({}, object, {[key]: value});
+    return {...object, ...{[key]: value}}
+   // return Object.assign({}, object, {[key]: value});
 }
 
 // Convertire un oggetto contentene altri oggetti in array
@@ -47,19 +48,10 @@ export function arrayToObject(array) {
 // Come `arrayToObject`, ma tutti i valori di tipo array devono a loro volta essere trasformati in oggetti
 // Controllare il test per vedere dato iniziale e risultato finale
 export function arrayToObjectDeep(array) {
-    //uhhh
     return array.reduce((accumulator,currentValue) => 
          Array.isArray(currentValue[1])
         ? {...accumulator, [currentValue[0]] : arrayToObjectDeep(currentValue[1])} 
         : {...accumulator, [currentValue[0]] : currentValue[1]}, {})
-
-        /* const newObject = {}
-    array.map(element =>
-        Array.isArray(element[1]) 
-        ? newObject[element[0]] = arrayToObjectDeep(element[1]) 
-        : newObject[element[0]] = element[1]
-    )
-    return newObject */
 }   
 
 // Dato un oggetto e una funzione `predicate` da chiamare con la coppia chiave-valore,
@@ -67,13 +59,7 @@ export function arrayToObjectDeep(array) {
 // Es.: { name: 'Mary', age: 99, children: 4 } con predicate = (key, value) => value > 10
 // restituisce true perché è presente una proprietà maggiore di 10 (age)
 export function hasValidProperty(object, predicate) {
-
-    for(let key in object){
-        if(predicate(key,object[key])){
-            return true;
-        }
-    }
-    return false;
+    return Object.entries(object).some((pair) => predicate(pair[0], pair[1]))
 }
 
 // Dato un oggetto, estrarre tutti i valori che sono a loro volta oggetti in un oggetto separato, usando come chiave il loro id;
@@ -83,7 +69,7 @@ export function hasValidProperty(object, predicate) {
 // Restituire un array con i due oggetti (vedere il test per altri esempi)
 // Idealmente dovrebbe funzionare per ogni oggetto trovato dentro l'oggetto di partenza, anche quelli annidati
 
-export function normalizeObject(object) {
+export function normalizeObject(object) { // aaaahhhh!!!! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     /*
     object potenzialmente composto da oggetti, object[key]
     questi possono a loro volta essere composti da oggetti
@@ -92,7 +78,7 @@ export function normalizeObject(object) {
     for(let key in object){ //carName, carDescription, etc.
         if(typeof object[key] === 'object'){ //Object tipo engine, owner...
             newObjectArray[0][key+"Id"] = object[key]["id"]; //Aggiungi l'id al primo oggetto
-            let normResult =normalizeObject(object[key])
+            let normResult = normalizeObject(object[key])
             newObjectArray[1][object[key]["id"]] = normResult[0]
             for(let keyRec in normResult[1]){
                 newObjectArray[1][normResult[1][keyRec]["id"]] = normResult[1][keyRec]
@@ -114,30 +100,17 @@ export function normalizeObject(object) {
 // restituire la profondità (in questo caso 3)
 // Il tree ha la seguente struttura: { value: 'A', children: [{ value: 'B', children: [...] }, { value: 'C' }] }
 export function getTreeDepth(tree) {
-    let depth = 1;
-    let newDepth = 0;
-    if("children" in tree){
-        tree["children"].forEach(element => { 
-            newDepth = 1 + getTreeDepth(element);
-            depth = (newDepth > depth) ? newDepth : depth; // prende la profondità maggiore tra tutti i rami figli
-        });
-    }
-    return depth;
+    // Se non ha figli la profondità è 1, se ha figli la profondità è 1 + la profondità massima tra i figli
+    return ("children" in tree) ? 1 + (Math.max(...tree["children"].map(getTreeDepth))) : 1
 }
 
 // Dato un tree come sopra, contare il numero di nodi "leaf", cioè quelli senza ulteriori figli (0 children)
 // Considerando l'esempio sopra, i nodi "leaf" sono 4 (C, D, E, F)
 export function countTreeLeafNodes(tree) {
-    let leaves = 0;
-    if("children" in tree){ //Se ha figli somma le foglie di quei figli
-            tree["children"].forEach(branch => { 
-                leaves += countTreeLeafNodes(branch)
-            });
-    }
-    else{ //Altrimenti è lui stesso una foglia
-            leaves = 1//
-    }
-    return leaves;
+    // Se non ha figli è esso stesso una foglia, se ha figli le foglie sono la somma delle foglie dei figli
+    return ("children" in tree) 
+    ? tree["children"].reduce(((leavesNum,branch) => leavesNum += countTreeLeafNodes(branch)), 0) 
+    : 1
 }
 
 // Dati un oggetto e un path di tipo stringa, `get` deve restituire la proprietà al path specificato.
@@ -146,79 +119,62 @@ export function countTreeLeafNodes(tree) {
 // Es. 1: { address: { city: 'New York' } } e 'address.city' restituisce 'New York'
 // Es. 2: { movies: ['Shrek', 'Shrek 2'] } e 'movies.1' restituisce 'Shrek 2'
 export function get(object, path, fallback) {
-    let retProperty;
-    let pathArray = []
-    if(!Array.isArray(path)){ // Nel primo loop splitta il path in un array così si può parsare meglio
-        pathArray = path.split(".");
-    }else{
-        pathArray = path;
-    }
-    let childObject = {};
-    if(pathArray.length > 1){ // Se il path ha oggetti figli (e quindi non dobbiamo cercare qui)
-        if(pathArray[0] in object){ // Se abbiamo un path in cui entrare
-                childObject = object[pathArray[0]]; // Allora prendi l'oggetto figlio, leva la prima parte dell'indirizzo, e ricerca ricorsivamente
-                pathArray.splice(0,1);
-                retProperty = get(childObject,pathArray,fallback)
-            }
-        else{ // Se non c'è path restituisci fallback
-            return fallback;
-        }
-    }
-    else{ // Se il path NON ha oggetti figli e dobbiamo cercare qui
-        if(pathArray[0] in object){ //Allora se c'è prendilo, altrimenti fallback
-                retProperty = object[pathArray[0]]
-            }
-        else{
-            return fallback;
-        }
-        }
-    return retProperty;
+    const pathArray = path.split("."); // split per convenienza
+    return (pathArray[0] in object) // Se esiste il path corrente nell'oggetto procedi, altrimenti fallback
+        ? (pathArray.length > 1) // Se non è la fine del path procedi con la get nel sotto-oggetto, altrimenti restituisci la proprietà finale
+            ? get(object[pathArray[0]],pathArray.slice(1,).join("."),fallback)
+            : object[pathArray[0]]
+        : fallback
 }
 
 // Dato un oggetto con una struttura non uniforme contentente informazioni geografiche
 // su strade e punti di interesse, generare un oggetto GeoJSON (RFC 7946) valido.
 // NOTA: per avere un'idea dell'input vedere il test corrispondente,
 // per il GeoJSON finale da generare vedere il file `mock.js`.
-export function createGeoJSON(data) { //Orribile ma...
-    let poiToBuild = {};
-    let streetToBuild = {};
-    let geoJSON = {
-        type: 'FeatureCollection',
-        features: [],
-    }
-    data["pointsOfInterest"].forEach(poi =>{ //Per ogni punto di interesse: tutta quella roba hardcodata
-        poiToBuild = {};
-        poiToBuild["type"] = 'Feature';
-        poiToBuild["geometry"] = {};
-        poiToBuild["geometry"]["type"] = 'Point';
-        poiToBuild["geometry"]["coordinates"] = [];
-        poiToBuild["geometry"]["coordinates"][0] = poi["coordinates"]["lng"]
-        poiToBuild["geometry"]["coordinates"][1] = poi["coordinates"]["lat"]
-        poiToBuild["properties"] = {};
-        poiToBuild["properties"]["name"] = poi["name"];
-        geoJSON["features"].push(poiToBuild)
-    })
-    data["streets"].forEach(street =>{ //Per ogni strada: tutta quella roba più o meno hardcodata
-        streetToBuild = {};
-        streetToBuild["type"] = 'Feature';
-        streetToBuild["geometry"] = {};
-        streetToBuild["geometry"]["type"] = 'LineString';
-        streetToBuild["geometry"]["coordinates"] = [];
-        let matches = (street["polyline"].match(/\d+.\d+/g)).map(Number);  //Parsa solo i numeri col punto dalla stringa polyline
+export function createGeoJSON(data) { //less horrible
+    function parseCoordinates(coordString){
+        let matches = (coordString.match(/\d+.\d+/g)).map(Number);  //Parsa solo i numeri col punto dalla stringa polyline (e li trasforma in numero)
         let coordinatesArray = []
         const chunkSize = 2;
-        for (let i = 0; i < matches.length; i += chunkSize) { //Sostanzialmente raggruppa i numeri a gruppi di due ed escludi i gruppi dispari tranne il primo
-            const chunk = matches.slice(i, i + chunkSize);
+        //Sostanzialmente raggruppa i numeri a gruppi di due ed esclude i gruppi "dispari" (gli start) tranne il primo
+        for (let i = 0; i < matches.length; i += chunkSize) { 
             if(i == 0 || (i%4) == 2){
+                const chunk = matches.slice(i, i + chunkSize);//
                 coordinatesArray.push(chunk)
             }
         }
-        streetToBuild["geometry"]["coordinates"] = [...coordinatesArray];
-        streetToBuild["properties"] = {};
-        streetToBuild["properties"]["name"] = street["name"];
-        streetToBuild["properties"]["lanes"] = street["extraProps"]["lane"];
-        geoJSON["features"].push(streetToBuild)
-    })
+        return coordinatesArray;
+    }
+    const geoJSON = {
+        type: 'FeatureCollection',
+        features: [],
+        
+    }
+    geoJSON["features"] = [
+       ...data["pointsOfInterest"].map(poi =>
+            Object.assign({},{
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [poi["coordinates"]["lng"], poi["coordinates"]["lat"]],
+                },
+                properties: {
+                    name: poi["name"],
+                }
+            },)),
+        
+        ...data["streets"].map(street =>
+            Object.assign({},{
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: parseCoordinates(street["polyline"]),
+                },
+                properties: {
+                    name: street["name"],
+                    lanes: street["extraProps"]["lane"]
+                }
+            },))]
     return geoJSON;
 }
 
@@ -229,7 +185,7 @@ export function createGeoJSON(data) { //Orribile ma...
 // Per vedere i dati in input e il risultato finale, fare riferimento ai test.
 // NOTA: usare booleanIntersects (https://turfjs.org/docs/api/booleanIntersects) per controllare se una geometria ne interseca un'altra.
 export function highlightActiveFeatures(geoJSON, point) {
-
+    
      let geomPoint = {
             type: 'Point',
             coordinates: point  
@@ -240,6 +196,33 @@ export function highlightActiveFeatures(geoJSON, point) {
     }
     let anyIntersection = false;
     geoJSON.forEach(geometry => {
+        // More expandable alternate to write the type
+        /* let geomType 
+        switch(geometry[0]){
+            case 'point':
+                geomType = 'Point';
+                break;
+            case 'line':
+                geomType = "LineString";
+                break;
+        } */
+        const feature = {
+            type: 'Feature',
+            geometry: {
+                type: geometry[0] === 'point' ? 'Point' : 'LineString',
+                coordinates: geometry[1],
+            },
+        }
+        if(booleanIntersects(feature["geometry"],geomPoint)){
+            anyIntersection = true;
+            feature["properties"] = {
+                highlighted: true
+            }
+        }
+        featureCollection["features"].push(feature)
+        
+    });
+    /* geoJSON.forEach(geometry => {
         let geomHolder = {}
         let feature = {}
         if(geometry[0] === 'point'){
@@ -254,7 +237,7 @@ export function highlightActiveFeatures(geoJSON, point) {
             geometry: {},
             
         }
-        feature["geometry"] = Object.assign({}, geomHolder)
+        feature["geometry"] = {...geomHolder}
         if(booleanIntersects(geomHolder,geomPoint)){
             anyIntersection = true;
             feature["properties"] = {}
@@ -262,7 +245,7 @@ export function highlightActiveFeatures(geoJSON, point) {
         }
         featureCollection["features"].push(feature)
         
-    });
+    }); */
     if(anyIntersection){
         return featureCollection;
     }else{
