@@ -69,7 +69,7 @@ export function hasValidProperty(object, predicate) {
 // Restituire un array con i due oggetti (vedere il test per altri esempi)
 // Idealmente dovrebbe funzionare per ogni oggetto trovato dentro l'oggetto di partenza, anche quelli annidati
 
-export function normalizeObject(object) { // aaaahhhh!!!! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+export function normalizeObject(object) { // aaaahhhh!!!! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!!!! AAAAAAAAAAAAAAAAAAAAAAAAAAA
     /*
     object potenzialmente composto da oggetti, object[key]
     questi possono a loro volta essere composti da oggetti
@@ -186,26 +186,18 @@ export function createGeoJSON(data) { //less horrible
 // NOTA: usare booleanIntersects (https://turfjs.org/docs/api/booleanIntersects) per controllare se una geometria ne interseca un'altra.
 export function highlightActiveFeatures(geoJSON, point) {
     
-     let geomPoint = {
+    const geomPoint = {
             type: 'Point',
             coordinates: point  
-        }
-    let featureCollection = {
+    }
+    const featureCollection = {
         type: "FeatureCollection",
         features: []
     }
     let anyIntersection = false;
-    geoJSON.forEach(geometry => {
-        // More expandable alternate to write the type
-        /* let geomType 
-        switch(geometry[0]){
-            case 'point':
-                geomType = 'Point';
-                break;
-            case 'line':
-                geomType = "LineString";
-                break;
-        } */
+
+    featureCollection["features"] = geoJSON.map(geometry => {
+
         const feature = {
             type: 'Feature',
             geometry: {
@@ -219,38 +211,17 @@ export function highlightActiveFeatures(geoJSON, point) {
                 highlighted: true
             }
         }
-        featureCollection["features"].push(feature)
+        return feature;
         
     });
-    /* geoJSON.forEach(geometry => {
-        let geomHolder = {}
-        let feature = {}
-        if(geometry[0] === 'point'){
-            geomHolder["type"] = 'Point';
-            geomHolder["coordinates"] = geometry[1];
-        }else if(geometry[0] === 'line'){
-            geomHolder["type"] = 'LineString';
-            geomHolder["coordinates"] = geometry[1];
-        }
-        feature = {
-            type: 'Feature',
-            geometry: {},
-            
-        }
-        feature["geometry"] = {...geomHolder}
-        if(booleanIntersects(geomHolder,geomPoint)){
-            anyIntersection = true;
-            feature["properties"] = {}
-            feature["properties"]["highlighted"] = true;
-        }
-        featureCollection["features"].push(feature)
-        
-    }); */
-    if(anyIntersection){
-        return featureCollection;
-    }else{
-        return null;
-    }
+    // fancy return if we were to not use anyIntersection
+    /* return (featureCollection["features"].some(feature => 
+      feature.hasOwnProperty("properties") 
+      && feature["properties"].hasOwnProperty("highlighted") 
+      && feature.properties.highlighted === true))
+      ? featureCollection : null */
+    return anyIntersection ? featureCollection : null
+
 }
 
 // Data una stringa in formato VTT contentente una lista di sottotitoli associati a un istante temporale (inizio --> fine), es.:
@@ -272,41 +243,28 @@ export function getLineFromVTT(vtt, time) {
 
     }
     let subtitleFound = false;
-    let subtitles = vtt.split("\n\n");
-    let retString;
-    subtitles.splice(0,1);
+    let subtitles = vtt.split("\n\n").slice(1,); // Doppio \n separa i sottotitoli, escluso il primo perchè non è un sottotitolo vero
+    let foundSubtitle;
     subtitles.forEach(subtitle => {
-        let subtitleObject = {}
-        let helperArray = subtitle.split("\n")
-        let helperArrayTime = helperArray[0].split(" --> ")
-        subtitleObject["startTime"] = helperArrayTime[0];
-        subtitleObject["endTime"] = helperArrayTime [1];
-        subtitleObject["subtitleText"] = helperArray[1]
+        const subtitleLine = subtitle.split("\n",2) // limite di 2 perchè c'è un \n aggiuntivo alla fine di un sottotitolo
+        const subtitleTime = subtitleLine[0].split(" --> ")
+        const subtitleText = subtitleLine[1]
+
+        const startTimeFloat = timeConversion(subtitleTime[0])
+        const endTimeFloat = timeConversion(subtitleTime[1])
+        const currTimeFloat = timeConversion(time)  
+        
         /*
         00:05.000, 00:09.000
-        Come trovare un tempo tra due tempi (escludiamo i minuti per ora)
-        se è strettamente maggiore dei primi secondi e strettamente minore dei secondi secondi, OK
-        se non lo è, controlla se tutti e 3 sono uguali 
+        Trovare un tempo tra due tempi: confronto tra float, convertendo i minuti a 60 secondi
         */
-       let startTimeTest = timeConversion(subtitleObject["startTime"])
-       let endTimeTest = timeConversion(subtitleObject["endTime"])
-       let currTimeTest = timeConversion(time)
-       //console.log("startTime: " + startTimeTest + ", endTime: " + endTimeTest + ", currTime: " + currTimeTest)
-       
-       if(currTimeTest >= startTimeTest && currTimeTest <= endTimeTest){
-
-            retString = subtitleObject["subtitleText"];
+       if(currTimeFloat >= startTimeFloat && currTimeFloat <= endTimeFloat){
+            foundSubtitle = subtitleText;
             subtitleFound = true
-            
        }
         
     });
-    if(subtitleFound){
-        return retString;
-    }else{
-        return null;
-    }
-    
-    //console.log(subtitles)
+    return (subtitleFound) ? foundSubtitle : null
+
     
 }
