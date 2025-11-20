@@ -14,7 +14,6 @@ export function mergeObjects(object1, object2) {
 // senza modificare l'originale, ma restituendo una copia
 export function setProperty(object, [key, value]) {
     return {...object, ...{[key]: value}}
-   // return Object.assign({}, object, {[key]: value});
 }
 
 // Convertire un oggetto contentene altri oggetti in array
@@ -69,7 +68,7 @@ export function hasValidProperty(object, predicate) {
 // Restituire un array con i due oggetti (vedere il test per altri esempi)
 // Idealmente dovrebbe funzionare per ogni oggetto trovato dentro l'oggetto di partenza, anche quelli annidati
 
-export function normalizeObject(object) { // aaaahhhh!!!! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!!!! AAAAAAAAAAAAAAAAAAAAAAAAAAA
+export function normalizeObject(object) { // A
     /*
     object potenzialmente composto da oggetti, object[key]
     questi possono a loro volta essere composti da oggetti

@@ -1,5 +1,6 @@
 /*
-  Very strange behaviour, read on immutability when wifi is back LOL
+  ask how to best do deep cloning
+  a lot of these are still shallowly cloned references
 */
 const user10 = Object.freeze({
   id: 10,
@@ -30,72 +31,47 @@ export const users = Object.freeze([user10])
 // addressChanges è un oggetto che contiene una o più proprietà di Address da cambiare, ad esempio { city: London }
 // Restituire l'array di utenti con le proprietà cambiate, mantenendo invariate quelle non presenti in addressChanges
 export const changeUsersAddress = (users, addressChanges) => {
-  //Map??!
   return users.map(user =>{
-    const newUser = Object.assign({},user);
-    const changedAddress = Object.assign({},user["address"]);
-    for(const key in addressChanges){
-      changedAddress[key] = addressChanges[key]
+    return {
+      ...user,
+      address:{
+        ...user["address"], ...addressChanges
+      }
     }
-    newUser["address"] = Object.assign({},changedAddress)
-    return newUser;
   })
 }
 
 // Restituire l'array di utenti senza geo in address
 export const removeAddressCoordinates = (users) => {
-  let newUsers = [];
-  let newUser = {};
-  users.forEach(user => {
-    newUser = Object.assign({},user);
-    let changedAddress = Object.assign({},user["address"]);
-    delete changedAddress["geo"];
-    newUser["address"] =Object.assign({},changedAddress)
-    newUsers.push(newUser)
-
-  });
-  return newUsers;
+  
+  return users.map(user => {
+    const newUser = JSON.parse(JSON.stringify(user))
+    delete newUser["address"]["geo"]
+    return newUser
+  })
 }
 
 // Restituire l'array di utenti senza company
 export const removeCompanyInfo = (users) => {
-  let newUsers = [];
-  let newUser = {};
-  users.forEach(user => {
-    newUser = Object.assign({},user);
-    delete newUser["company"]
-    newUsers.push(newUser)
-
-  });
-  return newUsers;
+  return users.map(user => {
+    const {company, ...newUser} = user;
+    return newUser;
+  })
 }
 
 // Restituire newUser a users e restituire l'array
 export const addNewUser = (users, newUser) => {
-  let newUsers = [];
-  users.forEach(user =>{
-    newUsers.push(user);
-  })
-  newUsers.push(newUser);
-  return newUsers;
+  return [...users, newUser]
 }
 
 // Restituire l'array di utenti con lat e lng dentro geo convertiti in numero, non stringa
 export const convertUsersGeoToNumber = (users) => {
-  let newUsers = [];
-  let newUser = {};
-  users.forEach(user => {
-    
-    let newGeo = Object.assign({},user["address"]["geo"])
-    for(let key in newGeo){
-      
-      newGeo[key] = Number(user["address"]["geo"][key])
-    }
-    let newAddress = Object.assign({},user["address"]);
-    newAddress["geo"] = newGeo;
-    newUser = {...user, address: newAddress}
-    newUsers.push(newUser)
-
+  return users.map(user => {
+    return {...user, 
+      address: {
+        ...user["address"],
+        geo: Object.fromEntries(Object.entries(user["address"]["geo"]).
+        map(pair => [pair[0],Number(pair[1])]))
+      }}
   });
-  return newUsers;
 }
