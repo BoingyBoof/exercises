@@ -95,11 +95,10 @@ export function sortBy(array, key, direction) {
 // Es.: [{ id: 1, name: 'A' }, { id: 2, name: 'B' }] con key = 'name' deve restituire
 // { A: { id: 1, name: 'A' }, B: { id: 2, name: 'B' } }
 export function keyBy(array, key) {
-    const obj = {}
-    for(const element of array){
-        obj[element[key]] = Object.assign({},element)
-    }
-    return obj
+    return array.reduce((accumulator,element) =>
+        ({...accumulator,
+            [element[key]]: Object.assign({},element),
+        }),{})
 }
 
 // Dato un array, inserire il nuovo elemento all'indice specificato, sostituendo quello che c'è già
@@ -136,7 +135,7 @@ export function removeProperties(array, properties) {
 // L'array originale e i suoi elementi non devono essere modificati
 export function setSelected(array, selectedIds) {
     return array.map(element => {
-        let newElement = Object.assign({}, element)
+        const newElement = Object.assign({}, element)
         if(selectedIds.includes(newElement["id"])){
             newElement["selected"] = true
         }
@@ -267,7 +266,7 @@ export function reduce(array, reducer, initialState) {
 // Dato un array e una funzione, spostare alla fine dell'array l'elemento per il quale la funzione restituisce true
 // Nota: soltanto uno degli elementi soddisfa la funzione shouldMove
 export function moveToEnd(array, shouldMove) {
-    let newArray = cloneArray(array);
+    const newArray = cloneArray(array);
     newArray.push(newArray.splice(newArray.findIndex(shouldMove),1)[0])
     return newArray;
 }
