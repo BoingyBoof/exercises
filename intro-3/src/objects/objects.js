@@ -73,21 +73,23 @@ export function normalizeObject(object) { // A
     object potenzialmente composto da oggetti, object[key]
     questi possono a loro volta essere composti da oggetti
     */
-    let newObjectArray = [{},{}];
-    for(let key in object){ //carName, carDescription, etc.
-        if(typeof object[key] === 'object'){ //Object tipo engine, owner...
-            newObjectArray[0][key+"Id"] = object[key]["id"]; //Aggiungi l'id al primo oggetto
-            let normResult = normalizeObject(object[key])
-            newObjectArray[1][object[key]["id"]] = normResult[0]
-            for(let keyRec in normResult[1]){
-                newObjectArray[1][normResult[1][keyRec]["id"]] = normResult[1][keyRec]
+    let normObjectValues = [{},{}];
+    Object.entries(object).map(property =>{
+            if(typeof property[1] === 'object'){ //Object tipo engine, owner...
+            // Se è un oggetto: mette l'id in [0] in un campo apposito, 
+            // Lo normalizza ricorsivamente,
+            // E mette il risultato in [1], wrappando le proprietà "primitive" in un altro oggetto
+                normObjectValues[0][property[0]+"Id"] = property[1]["id"]; 
+                const innerNormResult = normalizeObject(property[1]) 
+                Object.assign(normObjectValues[1],
+                    {[innerNormResult[0]["id"]]: innerNormResult[0]},
+                    innerNormResult[1])
             }
-        }
-        else{
-             newObjectArray[0][key] = object[key]; // Altrimenti aggiungilo al primo e basta
-        }
-    }  
-    return newObjectArray;
+            else{
+                normObjectValues[0][property[0]] = property[1]; // Altrimenti aggiungilo a [0] e basta
+            }}
+    )
+    return normObjectValues;
 }
 
 // Dato un tree del tipo
