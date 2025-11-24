@@ -45,9 +45,8 @@ export const changeUsersAddress = (users, addressChanges) => {
 export const removeAddressCoordinates = (users) => {
   
   return users.map(user => {
-    const newUser = JSON.parse(JSON.stringify(user))
-    delete newUser["address"]["geo"]
-    return newUser
+    const {geo, ...address} = user["address"]
+    return {...user, address}
   })
 }
 

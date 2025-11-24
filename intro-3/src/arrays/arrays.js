@@ -165,7 +165,6 @@ export function areItemsValid(array, predicate) {
 // `populate` reve restituire [{ id: '11', name: 'B' }, { id: '22', name: 'C' }, { id: '33', name: 'A' }]
 // perché '11' nel primo array corrisponde con l'oggetto che ha id = '11' nel secondo array e così via
 export function populate(array, dataArray, key) {
-
     return array.map((value) => dataArray.find((element) => value == element[key]))
 }
 
@@ -255,7 +254,7 @@ export function reduce(array, reducer, initialState) {
     let reducedValue = (initialState ?? array[0])
 
     array.forEach((element,index,arrayy) => {
-        if(!(initialState === undefined && index == 0)){
+        if(!(initialState === undefined && index === 0)){
             reducedValue = reducer(reducedValue,element,index,arrayy)
         }
     }); 
